@@ -1,0 +1,28 @@
+mavenPublishing {
+    signAllPublications()
+    coordinates(project.group.toString(), project.name, project.version.toString())
+    pom {
+        name.set("CMP Compile Info")
+        description.set("Build information for Kotlin Multiplatform applications.")
+        inceptionYear.set("2026")
+        url.set("https://github.com/oOJohn6Oo/cmp-compile-info")
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
+        developers {
+            developer {
+                id.set("oOJohn6Oo")
+                name.set("John6")
+                email.set("john6.lq@gmail.com")
+            }
+        }
+        scm {
+            connection.set("scm:git:https://github.com/oOJohn6Oo/cmp-compile-info.git")
+            developerConnection.set("scm:git:ssh://git@github.com/oOJohn6Oo/cmp-compile-info.git")
+            url.set("https://github.com/oOJohn6Oo/cmp-compile-info")
+        }
+    }
+}
