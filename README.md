@@ -10,7 +10,6 @@ Compose Multiplatform 编译信息插件，支持 Android、iOS、OHOS 和 JVM�
 pluginManagement {
     repositories {
         mavenCentral()
-        gradlePluginPortal()
         maven("https://maven.eazytec-cloud.com/nexus/repository/maven-public/")
     }
 }
@@ -53,7 +52,17 @@ fun CompileInfoText() {
 | `skiko` | 当前平台解析到的 Skiko 版本；未使用时为 `not-used`。 |
 | `packageTime` | 打包时间，包含时区。 |
 
-打包时间以 `jon-cmp-package-time.txt` 独立保存，生成于模块的 `build/generated/compileInfo/`，随 Compose 资源打包。更新时间不改变生成的 Kotlin 源码。
+## 资源目录
+
+`resourcesDirectory` 指定项目资源的读取目录，默认为 `src/commonMain/composeResources`，可自定义：
+
+```kotlin
+compileInfo {
+    resourcesDirectory.set(layout.projectDirectory.dir("my-resources"))
+}
+```
+
+打包时间以 `jon-cmp-package-time.txt` 独立保存，生成于模块的 `build/generated/compileInfo/`，随 Compose 资源打包。
 
 OHOS 的 `publishDebugBinariesToHarmonyApp`、`publishReleaseBinariesToHarmonyApp` Copy 任务将时间文件复制到 Harmony 工程的 `rawfile` 目录。
 
