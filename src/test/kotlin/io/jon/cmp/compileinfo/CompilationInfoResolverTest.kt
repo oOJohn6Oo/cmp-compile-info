@@ -10,6 +10,12 @@ import java.util.jar.JarOutputStream
 class CompilationInfoResolverTest {
     @get:Rule val temporary = TemporaryFolder()
 
+    @Test fun `CMP version comes from the loaded Compose plugin`() {
+        assertEquals("1.12.0", CompilationInfoResolver.cmpPluginVersion(
+            org.jetbrains.compose.ComposePlugin::class.java.classLoader
+        ))
+    }
+
     @Test fun `Android without Skiko does not invent a dependency`() {
         assertEquals(SkikoInfo("not-used"), CompilationInfoResolver.skiko("android", listOf("androidx.compose.ui:ui:1.12.0")))
     }

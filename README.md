@@ -19,7 +19,7 @@ KMP 模块的 `build.gradle.kts`：
 
 ```kotlin
 plugins {
-    id("io.github.oojohn6oo.cmp.compile-info") version "0.1.0"
+    id("io.github.oojohn6oo.cmp.compile-info") version "0.1.1"
 }
 ```
 
@@ -49,6 +49,7 @@ fun CompileInfoText() {
 | `renderer` | OHOS 渲染后端，单独显示在首行。 |
 | `kotlin` | Kotlin 编译器版本。 |
 | `gradle` | Gradle 版本。 |
+| `cmp` | 项目使用的 `org.jetbrains.compose` 插件版本。 |
 | `skiko` | 当前平台解析到的 Skiko 版本；未使用时为 `not-used`。 |
 | `packageTime` | 打包时间，包含时区。 |
 

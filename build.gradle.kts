@@ -16,7 +16,7 @@ plugins {
 }
 
 group = "io.github.oojohn6oo"
-version = "0.1.0"
+version = "0.1.1"
 
 if (providers.gradleProperty("mavenCentralPublishing").getOrElse("false").toBoolean()) {
     apply(plugin = "com.vanniktech.maven.publish")

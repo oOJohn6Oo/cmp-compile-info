@@ -6,6 +6,10 @@ import java.util.jar.JarFile
 internal data class SkikoInfo(val version: String, val renderer: String? = null)
 
 internal object CompilationInfoResolver {
+    fun cmpPluginVersion(classLoader: ClassLoader): String =
+        classLoader.loadClass("org.jetbrains.compose.ComposeBuildConfig")
+            .getField("composeGradlePluginVersion").get(null) as String
+
     fun skiko(platform: String, coordinates: List<String>): SkikoInfo {
         val modules = coordinates.map { it.split(':', limit = 3) }
             .filter { it.size == 3 && (it[0] == "org.jetbrains.skiko" || it[0].startsWith("org.jetbrains.skiko.")) }

@@ -100,6 +100,7 @@ abstract class GenerateCompileInfoTask : DefaultTask() {
     @get:Input abstract val platform: Property<String>
     @get:Input abstract val kotlinVersion: Property<String>
     @get:Input abstract val gradleVersion: Property<String>
+    @get:Input abstract val cmpVersion: Property<String>
     @get:Input abstract val resolvedCoordinates: ListProperty<String>
     @get:Input @get:Optional abstract val nativeHome: Property<String>
     @get:OutputDirectory abstract val outputDirectory: DirectoryProperty
@@ -115,6 +116,7 @@ abstract class GenerateCompileInfoTask : DefaultTask() {
         skiko.renderer?.let { values["renderer"] = it }
         values["kotlin"] = compiler
         values["gradle"] = gradleVersion.get()
+        values["cmp"] = cmpVersion.get()
         values["skiko"] = skiko.version
         val file = outputDirectory.file("io/jon/cmp/compileinfo/PlatformCompileInfo.kt").get().asFile
         file.parentFile.mkdirs()

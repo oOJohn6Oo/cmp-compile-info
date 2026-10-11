@@ -37,6 +37,7 @@ class CompileInfoPlugin : Plugin<Project> {
     private fun configure(project: Project) {
         val kotlin = project.extensions.getByType(KotlinMultiplatformExtension::class.java)
         val gradleVersion = project.gradle.gradleVersion
+        val cmpVersion = project.objects.property(String::class.java).convention("not-used")
         val api = project.tasks.register("generateCompileInfoApi", GenerateCompileInfoApiTask::class.java) {
             it.group = "compile info"
             it.description = "Generate the common CompileInfo.printCompileInfo() API."
@@ -45,6 +46,10 @@ class CompileInfoPlugin : Plugin<Project> {
         kotlin.sourceSets.named("commonMain") { it.kotlin.srcDir(api) }
 
         project.pluginManager.withPlugin("org.jetbrains.compose") {
+            // Read the applied plugin's value instead of inlining our compile-time CMP version.
+            cmpVersion.set(CompilationInfoResolver.cmpPluginVersion(
+                project.plugins.getPlugin("org.jetbrains.compose").javaClass.classLoader
+            ))
             val resources = (project.extensions.getByName("compose") as ExtensionAware)
                 .extensions.getByType(ResourcesExtension::class.java)
             val timestamp = project.tasks.register("generateCompileInfoTime", GenerateCompileInfoTimeTask::class.java) {
@@ -109,6 +114,7 @@ class CompileInfoPlugin : Plugin<Project> {
                     task.description = "Generate compile info for ${target.name}/$name."
                     task.platform.set(platform)
                     task.gradleVersion.set(gradleVersion)
+                    task.cmpVersion.set(cmpVersion)
                     task.resolvedCoordinates.set(coordinates)
                     task.outputDirectory.set(project.layout.buildDirectory.dir("generated/compileInfo/${target.name}/$name"))
                     if (target is KotlinNativeTarget) {

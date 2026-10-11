@@ -147,6 +147,40 @@ class CompileInfoPluginFunctionalTest {
         assertTrue(simulator.contains("\"skiko\" to \"2\""))
     }
 
+    @Test fun `configuration cache stores plugin tasks and reuses resource copy`() {
+        val dir = fixture("""
+            plugins {
+                id 'org.jetbrains.kotlin.multiplatform'
+                id 'org.jetbrains.compose'
+                id 'org.jetbrains.kotlin.plugin.compose'
+                id 'io.github.oojohn6oo.cmp.compile-info'
+            }
+            kotlin { jvm() }
+            compose.resources { packageOfResClass = 'fixture.resources' }
+            tasks.register('publishDebugBinariesToHarmonyApp', Copy) { into(layout.buildDirectory.dir('harmony')) }
+        """.trimIndent())
+        val tasks = arrayOf("generateCompileInfoApi", "generateJvmMainCompileInfo",
+            "prepareCompileInfoResources", "publishDebugBinariesToHarmonyApp",
+            "--configuration-cache", "--configuration-cache-problems=fail")
+        val first = runner(dir, *tasks).build()
+        assertTrue(first.output.contains("Configuration cache entry stored."))
+        val source = actual(dir, "jvm")
+        val sourceBefore = source.readText()
+        val modifiedBefore = source.lastModified()
+        assertTrue(sourceBefore.contains("\"cmp\" to \"1.12.0\""))
+        val time = dir.resolve("build/generated/compileInfo/timeResources/files/compile-info/jon-cmp-package-time.txt")
+        val timeBefore = time.readText()
+        val second = runner(dir, *tasks).build()
+        assertTrue(second.output.contains("Reusing configuration cache."))
+        assertEquals(TaskOutcome.UP_TO_DATE, second.task(":generateCompileInfoApi")!!.outcome)
+        assertEquals(TaskOutcome.UP_TO_DATE, second.task(":generateJvmMainCompileInfo")!!.outcome)
+        assertEquals(sourceBefore, source.readText())
+        assertEquals(modifiedBefore, source.lastModified())
+        assertNotEquals(timeBefore, time.readText())
+        val copiedTime = dir.resolve("build/harmony/entry/src/main/resources/rawfile/composeResources/fixture.resources/files/compile-info/jon-cmp-package-time.txt")
+        assertEquals(time.readText(), copiedTime.readText())
+    }
+
     @Test fun `configuration cache reuse refreshes time and generated API compiles and prints`() {
         val dir = fixture("""
             plugins {
@@ -208,13 +242,18 @@ class CompileInfoPluginFunctionalTest {
                 }
             """.trimIndent())
         }
-        val first = runner(dir, "runSample", "publishDebugBinariesToHarmonyApp", "--configuration-cache").build()
+        val first = runner(dir, "runSample", "publishDebugBinariesToHarmonyApp",
+            "--configuration-cache", "--configuration-cache-problems=fail").build()
+        assertTrue(first.output.contains("Configuration cache entry stored."))
+        assertTrue(first.output.contains("[CompileInfo] cmp=1.12.0"))
         assertFalse(first.output.contains("[CompileInfo] platform="))
         assertTrue(first.output.contains("[CompileInfo] kotlin=$kotlinVersion"))
         assertTrue(first.output.contains("[CompileInfo] skiko="))
         val before = actual(dir, "jvm").readText()
-        val second = runner(dir, "runSample", "publishDebugBinariesToHarmonyApp", "--configuration-cache").build()
+        val second = runner(dir, "runSample", "publishDebugBinariesToHarmonyApp",
+            "--configuration-cache", "--configuration-cache-problems=fail").build()
         assertTrue(second.output.contains("Reusing configuration cache."))
+        assertTrue(second.output.contains("[CompileInfo] cmp=1.12.0"))
         val after = actual(dir, "jvm").readText()
         assertEquals(before, after)
         val firstTimestamp = Regex("\\[CompileInfo] packageTime=(.+)").find(first.output)!!.groupValues[1].trim()
